@@ -8,9 +8,27 @@ Built with Vite, React, TypeScript and Tailwind CSS v4.
 - Create, edit and delete countdowns; switch between several of them.
 - Everything is saved to `localStorage`, so your last countdown is there when you come back.
 - Light and dark mode: follows your system setting by default, with a System / Light / Dark toggle.
-- **Stream overlay**: "Copy overlay link" gives a URL you can add as a browser source in OBS or
-  Streamlabs. It shows only the countdown and keeps working on its own, since the timer is in the URL.
-  Parameters: `?overlay=1&title=…&subtitle=…&target=<ISO date>&theme=light|dark`.
+
+## OBS / stream overlay
+
+Open a countdown and choose **Show on stream** to build a link for an OBS or Streamlabs
+browser source (1280×720 works well). The `/obs` route shows only the timer, on a transparent page.
+
+The link carries the countdown itself, so it works in OBS's separate browser. If you edit a
+countdown, copy the link again.
+
+| Parameter  | Values                       | Default        |
+| ---------- | ---------------------------- | -------------- |
+| `title`    | text                         |                |
+| `subtitle` | text                         |                |
+| `target`   | ISO 8601 date (required)     |                |
+| `theme`    | `dark`, `light`              | system         |
+| `bg`       | `none` for fully transparent | readable panel |
+| `compact`  | `1` to show only the digits  | off            |
+| `scale`    | `0.5` to `3`                 | `1`            |
+| `done`     | message shown at zero        | It's live!     |
+
+Older `/?overlay=1&…` links still work.
 
 ## Accessibility
 

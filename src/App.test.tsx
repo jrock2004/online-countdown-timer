@@ -64,4 +64,27 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'First' })).toHaveFocus();
     expect(within(nav).getByRole('button', { name: /first/i })).toHaveAttribute('aria-current', 'true');
   });
+
+  it('builds an OBS link from the panel options', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await createCountdown(user, 'Dawn League');
+
+    const toggle = screen.getByRole('button', { name: /show on stream/i });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(screen.getByRole('radio', { name: 'Transparent' }));
+    await user.click(screen.getByRole('checkbox', { name: /digits only/i }));
+    await user.selectOptions(screen.getByLabelText('Size'), '150%');
+
+    const url = new URL((screen.getByLabelText(/obs browser source url/i) as HTMLInputElement).value);
+    expect(url.pathname).toBe('/obs');
+    expect(url.searchParams.get('title')).toBe('Dawn League');
+    expect(url.searchParams.get('bg')).toBe('none');
+    expect(url.searchParams.get('compact')).toBe('1');
+    expect(url.searchParams.get('scale')).toBe('1.5');
+    expect(screen.getByRole('link', { name: /preview \(opens in a new tab\)/i })).toHaveAttribute('href', url.href);
+  });
 });
