@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/Button';
 import { ConfirmDialog } from './components/ConfirmDialog';
+import { ObsPanel } from './components/ObsPanel';
 import { CountdownDisplay } from './components/CountdownDisplay';
 import { ThemeToggle } from './components/ThemeToggle';
 import { TimerForm } from './components/TimerForm';
@@ -9,7 +10,6 @@ import { useNow } from './hooks/useNow';
 import { useTheme } from './hooks/useTheme';
 import { useTimers } from './hooks/useTimers';
 import { getRemaining } from './lib/countdown';
-import { buildOverlayUrl } from './lib/overlay';
 import type { TimerInput } from './lib/timers';
 
 type Mode = 'view' | 'create' | 'edit';
@@ -17,10 +17,11 @@ type Mode = 'view' | 'create' | 'edit';
 const pad = (n: number) => String(n).padStart(2, '0');
 
 export default function App() {
-  const { preference, setPreference, isDark } = useTheme();
+  const { preference, setPreference } = useTheme();
   const { timers, active, add, update, remove, select } = useTimers();
   const [mode, setMode] = useState<Mode>(() => (active ? 'view' : 'create'));
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [obsOpen, setObsOpen] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [focusRequest, setFocusRequest] = useState(0);
   const now = useNow();
@@ -61,6 +62,12 @@ export default function App() {
     document.title = `${clock} · ${active.title}`;
   }, [mode, active, remaining]);
 
+  // Clear first so repeating the same message (e.g. copying twice) is announced again.
+  const announce = (message: string) => {
+    setAnnouncement('');
+    setTimeout(() => setAnnouncement(message), 50);
+  };
+
   const handleCreate = (input: TimerInput) => {
     add(input);
     goTo('view', `Countdown "${input.title}" created.`);
@@ -69,7 +76,7 @@ export default function App() {
   const handleUpdate = (input: TimerInput) => {
     if (!active) return;
     update(active.id, input);
-    goTo('view', `Countdown "${input.title}" updated.`);
+    goTo('view', `Countdown "${input.title}" updated. If it's in OBS, copy the new link.`);
   };
 
   const handleDelete = () => {
@@ -84,16 +91,6 @@ export default function App() {
   const handleSelect = (id: string) => {
     select(id);
     goTo('view');
-  };
-
-  const copyOverlayLink = async () => {
-    if (!active) return;
-    try {
-      await navigator.clipboard.writeText(buildOverlayUrl(active, isDark ? 'dark' : 'light'));
-      setAnnouncement('Overlay link copied to clipboard. Add it as a browser source in your streaming software.');
-    } catch {
-      setAnnouncement('Could not copy the overlay link. Your browser blocked clipboard access.');
-    }
   };
 
   return (
@@ -158,14 +155,16 @@ export default function App() {
                 <Button onClick={() => goTo('edit')}>
                   Edit <span className="sr-only">countdown {active.title}</span>
                 </Button>
-                <Button onClick={copyOverlayLink}>Copy overlay link</Button>
+                <Button aria-expanded={obsOpen} aria-controls="obs-panel" onClick={() => setObsOpen((o) => !o)}>
+                  Show on stream
+                </Button>
                 <Button variant="danger" onClick={() => setConfirmingDelete(true)}>
                   Delete <span className="sr-only">countdown {active.title}</span>
                 </Button>
               </div>
-              <p className="mx-auto mt-4 max-w-prose text-center text-sm text-slate-600 dark:text-slate-300">
-                Use the overlay link as a browser source in OBS or Streamlabs to show this countdown on stream.
-              </p>
+              <div id="obs-panel" hidden={!obsOpen}>
+                {obsOpen && <ObsPanel timer={active} onAnnounce={announce} />}
+              </div>
             </>
           )}
         </main>

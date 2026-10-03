@@ -5,7 +5,7 @@ import App from './App';
 import { Overlay } from './Overlay';
 import { parseOverlay } from './lib/overlay';
 
-const overlay = parseOverlay(window.location.search);
+const overlay = parseOverlay(window.location.pathname, window.location.search);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>{overlay ? <Overlay {...overlay} /> : <App />}</StrictMode>,

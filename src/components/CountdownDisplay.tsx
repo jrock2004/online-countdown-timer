@@ -9,6 +9,9 @@ interface Props {
   overlay?: boolean;
   headingProps?: { id?: string; tabIndex?: number };
   headingLevel?: 'h1' | 'h2';
+  /** Show only the digits; the title stays available to assistive tech. */
+  compact?: boolean;
+  doneLabel?: string;
 }
 
 const UNITS = ['days', 'hours', 'minutes', 'seconds'] as const;
@@ -21,26 +24,37 @@ export function CountdownDisplay({
   overlay = false,
   headingProps,
   headingLevel: Heading = 'h2',
+  compact = false,
+  doneLabel = 'It\u2019s live!',
 }: Props) {
   const remaining = getRemaining(target, now);
 
   return (
     <div className="text-center">
-      <Heading {...headingProps} className={`font-extrabold tracking-tight ${overlay ? 'text-5xl' : 'text-3xl sm:text-4xl'}`}>
+      <Heading
+        {...headingProps}
+        className={compact ? 'sr-only' : `font-extrabold tracking-tight ${overlay ? 'text-5xl' : 'text-3xl sm:text-4xl'}`}
+      >
         {title}
       </Heading>
-      {subtitle && (
+      {subtitle && !compact && (
         <p className={`mt-2 text-slate-700 dark:text-slate-300 ${overlay ? 'text-2xl' : 'text-lg'}`}>{subtitle}</p>
       )}
 
       {remaining.done ? (
-        <p role="timer" className="mt-8 text-5xl font-black text-violet-700 sm:text-6xl dark:text-violet-300">
-          It&rsquo;s live!
+        <p
+          role="timer"
+          className={`${compact ? '' : 'mt-8'} text-5xl font-black text-violet-700 sm:text-6xl dark:text-violet-300`}
+        >
+          {doneLabel}
         </p>
       ) : (
-        <div role="timer" aria-atomic="true" className="mt-8">
+        <div role="timer" aria-atomic="true" className={compact ? '' : 'mt-8'}>
           <span className="sr-only">{describeRemaining(remaining)} remaining</span>
-          <ol aria-hidden="true" className="mx-auto grid max-w-2xl grid-cols-4 gap-2 sm:gap-4">
+          <ol
+            aria-hidden="true"
+            className={`mx-auto grid grid-cols-4 gap-2 sm:gap-4 ${overlay ? 'w-[40rem] max-w-[calc(100vw-3rem)]' : 'max-w-2xl'}`}
+          >
             {UNITS.map((unit) => (
               <li
                 key={unit}
@@ -58,7 +72,7 @@ export function CountdownDisplay({
         </div>
       )}
 
-      <p className={`mt-6 text-slate-700 dark:text-slate-300 ${overlay ? 'text-xl' : ''}`}>
+      <p className={`mt-6 text-slate-700 ${compact ? 'sr-only' : ''} dark:text-slate-300 ${overlay ? 'text-xl' : ''}`}>
         {remaining.done ? 'Launched ' : 'Launches '}
         <time dateTime={target}>{formatTarget(target)}</time>
       </p>
