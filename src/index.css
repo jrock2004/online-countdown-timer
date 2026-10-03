@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+/* Class-based dark mode so the user toggle can override the system preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+  }
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-violet-600 dark:outline-violet-400;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Stream overlay: transparent so it composites cleanly over video in OBS. */
+html.overlay body {
+  background: transparent;
+}
