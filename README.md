@@ -7,6 +7,7 @@ Built with Vite, React, TypeScript and Tailwind CSS v4.
 
 - Create, edit and delete countdowns; switch between several of them.
 - Everything is saved to `localStorage`, so your last countdown is there when you come back.
+- **Copy for chat** puts a single line on your clipboard to paste into Twitch or YouTube chat, for example `New League starts in 3d 04:12:05`.
 - Light and dark mode: follows your system setting by default, with a System / Light / Dark toggle.
 
 ## OBS / stream overlay

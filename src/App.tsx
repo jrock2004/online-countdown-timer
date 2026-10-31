@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/Button';
 import { ConfirmDialog } from './components/ConfirmDialog';
+import { CopyForChatButton } from './components/CopyForChatButton';
 import { ObsPanel } from './components/ObsPanel';
 import { CountdownDisplay } from './components/CountdownDisplay';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -9,12 +10,10 @@ import { TimerList } from './components/TimerList';
 import { useNow } from './hooks/useNow';
 import { useTheme } from './hooks/useTheme';
 import { useTimers } from './hooks/useTimers';
-import { getRemaining } from './lib/countdown';
+import { formatClock, getRemaining } from './lib/countdown';
 import type { TimerInput } from './lib/timers';
 
 type Mode = 'view' | 'create' | 'edit';
-
-const pad = (n: number) => String(n).padStart(2, '0');
 
 export default function App() {
   const { preference, setPreference } = useTheme();
@@ -57,9 +56,7 @@ export default function App() {
       document.title = 'Launch Countdown';
       return;
     }
-    const { days, hours, minutes, seconds, done } = remaining;
-    const clock = done ? 'LIVE' : `${days ? `${days}d ` : ''}${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-    document.title = `${clock} · ${active.title}`;
+    document.title = `${remaining.done ? 'LIVE' : formatClock(remaining)} · ${active.title}`;
   }, [mode, active, remaining]);
 
   // Clear first so repeating the same message (e.g. copying twice) is announced again.
@@ -155,6 +152,7 @@ export default function App() {
                 <Button onClick={() => goTo('edit')}>
                   Edit <span className="sr-only">countdown {active.title}</span>
                 </Button>
+                <CopyForChatButton key={active.id} timer={active} onAnnounce={announce} />
                 <Button aria-expanded={obsOpen} aria-controls="obs-panel" onClick={() => setObsOpen((o) => !o)}>
                   Show on stream
                 </Button>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeRemaining, getRemaining } from './countdown';
+import { describeRemaining, formatChatMessage, formatClock, getRemaining } from './countdown';
 
 describe('getRemaining', () => {
   const now = Date.UTC(2026, 0, 1, 0, 0, 0);
@@ -20,5 +20,19 @@ describe('describeRemaining', () => {
     expect(describeRemaining(getRemaining(new Date((86400 + 3600 + 60) * 1000), now))).toBe('1 day, 1 hour and 1 minute');
     expect(describeRemaining(getRemaining(new Date(125 * 1000), now))).toBe('2 minutes and 5 seconds');
     expect(describeRemaining(getRemaining(new Date(0), now))).toBe('Launched');
+  });
+});
+
+describe('formatClock', () => {
+  it('pads the time and hides zero days', () => {
+    expect(formatClock(getRemaining(new Date(((3 * 24 + 4) * 3600 + 12 * 60 + 5) * 1000), 0))).toBe('3d 04:12:05');
+    expect(formatClock(getRemaining(new Date(65 * 1000), 0))).toBe('00:01:05');
+  });
+});
+
+describe('formatChatMessage', () => {
+  it('says how long is left, then that it is live', () => {
+    expect(formatChatMessage('New League', getRemaining(new Date(90061 * 1000), 0))).toBe('New League starts in 1d 01:01:01');
+    expect(formatChatMessage('New League', getRemaining(new Date(0), 0))).toBe('New League is live!');
   });
 });

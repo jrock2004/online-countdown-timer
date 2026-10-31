@@ -1,6 +1,6 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { STORAGE_KEY } from './lib/timers';
 
@@ -86,5 +86,32 @@ describe('App', () => {
     expect(url.searchParams.get('compact')).toBe('1');
     expect(url.searchParams.get('scale')).toBe('1.5');
     expect(screen.getByRole('link', { name: /preview \(opens in a new tab\)/i })).toHaveAttribute('href', url.href);
+  });
+
+  it('copies the countdown as a line for chat', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await createCountdown(user, 'Dawn League');
+
+    await user.click(screen.getByRole('button', { name: /copy for chat countdown dawn league/i }));
+
+    expect(await navigator.clipboard.readText()).toMatch(/^Dawn League starts in \d+d \d{2}:\d{2}:\d{2}$/);
+    expect(screen.getByRole('button', { name: /copied! countdown dawn league/i })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Countdown copied.'));
+  });
+
+  it('tells the user when copying for chat fails', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await createCountdown(user, 'Dawn League');
+    vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValueOnce(new Error('denied'));
+
+    await user.click(screen.getByRole('button', { name: /copy for chat/i }));
+
+    expect(screen.getByRole('button', { name: /couldn’t copy/i })).toBeInTheDocument();
+    expect(screen.getByText(/^Dawn League starts in/)).toBeVisible();
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent(/could not copy automatically\. the text is: dawn league starts in/i),
+    );
   });
 });
