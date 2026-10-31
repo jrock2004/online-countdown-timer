@@ -41,11 +41,12 @@ export function formatClock(r: Remaining): string {
   return `${r.days ? `${r.days}d ` : ''}${pad(r.hours)}:${pad(r.minutes)}:${pad(r.seconds)}`;
 }
 
-/** Single line to paste into a live chat, e.g. "New League starts in 3d 04:12:05". */
+/**
+ * Single line to paste into a live chat, e.g. "Countdown to New League: 3d 04:12:05".
+ * Never starts with the title, so chat or a bot can't read it as a command.
+ */
 export function formatChatMessage(title: string, r: Remaining): string {
-  // A leading /, . or ! would make chat or a bot treat the line as a command.
-  const name = /^[/.!]/.test(title) ? `Countdown: ${title}` : title;
-  return r.done ? `${name} is live!` : `${name} starts in ${formatClock(r)}`;
+  return r.done ? `Now live: ${title}` : `Countdown to ${title}: ${formatClock(r)}`;
 }
 
 export function formatTarget(iso: string, locale?: string): string {

@@ -95,7 +95,7 @@ describe('App', () => {
 
     await user.click(screen.getByRole('button', { name: /copy for chat countdown dawn league/i }));
 
-    expect(await navigator.clipboard.readText()).toMatch(/^Dawn League starts in \d+d \d{2}:\d{2}:\d{2}$/);
+    expect(await navigator.clipboard.readText()).toMatch(/^Countdown to Dawn League: \d+d \d{2}:\d{2}:\d{2}$/);
     expect(screen.getByRole('button', { name: /copied! countdown dawn league/i })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Countdown copied.'));
   });
@@ -110,7 +110,7 @@ describe('App', () => {
 
     expect(screen.getByRole('button', { name: /couldn’t copy/i })).toBeInTheDocument();
     const fallback = screen.getByLabelText<HTMLInputElement>(/copy this text instead/i);
-    expect(fallback.value).toMatch(/^Dawn League starts in/);
+    expect(fallback.value).toMatch(/^Countdown to Dawn League: /);
 
     // Tab order follows the layout: the rest of the buttons, then the text, ready to copy.
     await user.tab();
@@ -122,7 +122,7 @@ describe('App', () => {
     expect(fallback.selectionStart).toBe(0);
     expect(fallback.selectionEnd).toBe(fallback.value.length);
     await waitFor(() =>
-      expect(screen.getByRole('status')).toHaveTextContent(/could not copy automatically\. the text is: dawn league starts in/i),
+      expect(screen.getByRole('status')).toHaveTextContent(/could not copy automatically\. the text is: countdown to dawn league: /i),
     );
   });
 });

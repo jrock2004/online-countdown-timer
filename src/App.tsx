@@ -151,6 +151,7 @@ export default function App() {
               <CountdownActions
                 key={active.id}
                 timer={active}
+                now={now}
                 obsOpen={obsOpen}
                 onEdit={() => goTo('edit')}
                 onToggleObs={() => setObsOpen((o) => !o)}

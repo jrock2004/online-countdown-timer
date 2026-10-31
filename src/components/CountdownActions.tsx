@@ -5,6 +5,7 @@ import { Button } from './Button';
 
 interface Props {
   timer: Timer;
+  now: number;
   obsOpen: boolean;
   onEdit: () => void;
   onToggleObs: () => void;
@@ -14,13 +15,20 @@ interface Props {
 
 const FEEDBACK_MS = 2000;
 
-export function CountdownActions({ timer, obsOpen, onEdit, onToggleObs, onDelete, onAnnounce }: Props) {
+export function CountdownActions({ timer, now, obsOpen, onEdit, onToggleObs, onDelete, onAnnounce }: Props) {
   const [feedback, setFeedback] = useState('');
-  const [manualText, setManualText] = useState('');
+  const [copyBlocked, setCopyBlocked] = useState(false);
   const manualId = useId();
+  const manualInput = useRef<HTMLInputElement>(null);
   const resetTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const manualText = formatChatMessage(timer.title, getRemaining(timer.target, now));
 
   useEffect(() => () => clearTimeout(resetTimeout.current), []);
+
+  // The fallback text ticks with the clock, and each update would otherwise drop the selection.
+  useEffect(() => {
+    if (document.activeElement === manualInput.current) manualInput.current?.select();
+  }, [manualText]);
 
   const showFeedback = (label: string) => {
     setFeedback(label);
@@ -33,11 +41,11 @@ export function CountdownActions({ timer, obsOpen, onEdit, onToggleObs, onDelete
     const message = formatChatMessage(timer.title, getRemaining(timer.target));
     try {
       await navigator.clipboard.writeText(message);
-      setManualText('');
+      setCopyBlocked(false);
       showFeedback('Copied!');
       onAnnounce('Countdown copied. Paste it into your chat.');
     } catch {
-      setManualText(message);
+      setCopyBlocked(true);
       showFeedback('Couldn’t copy');
       onAnnounce(`Could not copy automatically. The text is: ${message}`);
     }
@@ -59,12 +67,13 @@ export function CountdownActions({ timer, obsOpen, onEdit, onToggleObs, onDelete
           Delete <span className="sr-only">countdown {timer.title}</span>
         </Button>
       </div>
-      {manualText && (
+      {copyBlocked && (
         <div className="mt-4 text-left">
           <label htmlFor={manualId} className="text-sm text-slate-700 dark:text-slate-300">
             Your browser blocked copying. Copy this text instead:
           </label>
           <input
+            ref={manualInput}
             id={manualId}
             type="text"
             readOnly
