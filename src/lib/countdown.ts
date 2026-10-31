@@ -34,6 +34,21 @@ export function describeRemaining(r: Remaining): string {
   return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
 }
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** Short clock for tight spaces, e.g. "3d 04:12:05". */
+export function formatClock(r: Remaining): string {
+  return `${r.days ? `${r.days}d ` : ''}${pad(r.hours)}:${pad(r.minutes)}:${pad(r.seconds)}`;
+}
+
+/**
+ * Single line to paste into a live chat, e.g. "Countdown to New League: 3d 04:12:05".
+ * Never starts with the title, so chat or a bot can't read it as a command.
+ */
+export function formatChatMessage(title: string, r: Remaining): string {
+  return r.done ? `Now live: ${title}` : `Countdown to ${title}: ${formatClock(r)}`;
+}
+
 export function formatTarget(iso: string, locale?: string): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(iso));
 }
