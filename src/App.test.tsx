@@ -112,7 +112,11 @@ describe('App', () => {
     const fallback = screen.getByLabelText<HTMLInputElement>(/copy this text instead/i);
     expect(fallback.value).toMatch(/^Dawn League starts in/);
 
-    // Keyboard users can reach the text straight from the button, ready to copy.
+    // Tab order follows the layout: the rest of the buttons, then the text, ready to copy.
+    await user.tab();
+    expect(screen.getByRole('button', { name: /show on stream/i })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('button', { name: /delete countdown/i })).toHaveFocus();
     await user.tab();
     expect(fallback).toHaveFocus();
     expect(fallback.selectionStart).toBe(0);

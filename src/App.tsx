@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/Button';
 import { ConfirmDialog } from './components/ConfirmDialog';
-import { CopyForChatButton } from './components/CopyForChatButton';
 import { ObsPanel } from './components/ObsPanel';
+import { CountdownActions } from './components/CountdownActions';
 import { CountdownDisplay } from './components/CountdownDisplay';
 import { ThemeToggle } from './components/ThemeToggle';
 import { TimerForm } from './components/TimerForm';
@@ -148,18 +148,15 @@ export default function App() {
                 now={now}
                 headingProps={{ id: 'view-heading', tabIndex: -1 }}
               />
-              <div className="mt-10 flex flex-wrap justify-center gap-3">
-                <Button onClick={() => goTo('edit')}>
-                  Edit <span className="sr-only">countdown {active.title}</span>
-                </Button>
-                <CopyForChatButton key={active.id} timer={active} onAnnounce={announce} />
-                <Button aria-expanded={obsOpen} aria-controls="obs-panel" onClick={() => setObsOpen((o) => !o)}>
-                  Show on stream
-                </Button>
-                <Button variant="danger" onClick={() => setConfirmingDelete(true)}>
-                  Delete <span className="sr-only">countdown {active.title}</span>
-                </Button>
-              </div>
+              <CountdownActions
+                key={active.id}
+                timer={active}
+                obsOpen={obsOpen}
+                onEdit={() => goTo('edit')}
+                onToggleObs={() => setObsOpen((o) => !o)}
+                onDelete={() => setConfirmingDelete(true)}
+                onAnnounce={announce}
+              />
               <div id="obs-panel" hidden={!obsOpen}>
                 {obsOpen && <ObsPanel timer={active} onAnnounce={announce} />}
               </div>

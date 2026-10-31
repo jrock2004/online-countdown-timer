@@ -5,12 +5,16 @@ import { Button } from './Button';
 
 interface Props {
   timer: Timer;
+  obsOpen: boolean;
+  onEdit: () => void;
+  onToggleObs: () => void;
+  onDelete: () => void;
   onAnnounce: (message: string) => void;
 }
 
 const FEEDBACK_MS = 2000;
 
-export function CopyForChatButton({ timer, onAnnounce }: Props) {
+export function CountdownActions({ timer, obsOpen, onEdit, onToggleObs, onDelete, onAnnounce }: Props) {
   const [feedback, setFeedback] = useState('');
   const [manualText, setManualText] = useState('');
   const manualId = useId();
@@ -41,11 +45,22 @@ export function CopyForChatButton({ timer, onAnnounce }: Props) {
 
   return (
     <>
-      <Button onClick={copy}>
-        {feedback || 'Copy for chat'} <span className="sr-only">countdown {timer.title}</span>
-      </Button>
+      <div className="mt-10 flex flex-wrap justify-center gap-3">
+        <Button onClick={onEdit}>
+          Edit <span className="sr-only">countdown {timer.title}</span>
+        </Button>
+        <Button onClick={copy}>
+          {feedback || 'Copy for chat'} <span className="sr-only">countdown {timer.title}</span>
+        </Button>
+        <Button aria-expanded={obsOpen} aria-controls="obs-panel" onClick={onToggleObs}>
+          Show on stream
+        </Button>
+        <Button variant="danger" onClick={onDelete}>
+          Delete <span className="sr-only">countdown {timer.title}</span>
+        </Button>
+      </div>
       {manualText && (
-        <div className="order-last w-full text-left">
+        <div className="mt-4 text-left">
           <label htmlFor={manualId} className="text-sm text-slate-700 dark:text-slate-300">
             Your browser blocked copying. Copy this text instead:
           </label>
