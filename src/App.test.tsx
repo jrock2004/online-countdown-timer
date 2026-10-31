@@ -109,7 +109,14 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: /copy for chat/i }));
 
     expect(screen.getByRole('button', { name: /couldn’t copy/i })).toBeInTheDocument();
-    expect(screen.getByText(/^Dawn League starts in/)).toBeVisible();
+    const fallback = screen.getByLabelText<HTMLInputElement>(/copy this text instead/i);
+    expect(fallback.value).toMatch(/^Dawn League starts in/);
+
+    // Keyboard users can reach the text straight from the button, ready to copy.
+    await user.tab();
+    expect(fallback).toHaveFocus();
+    expect(fallback.selectionStart).toBe(0);
+    expect(fallback.selectionEnd).toBe(fallback.value.length);
     await waitFor(() =>
       expect(screen.getByRole('status')).toHaveTextContent(/could not copy automatically\. the text is: dawn league starts in/i),
     );
