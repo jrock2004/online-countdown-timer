@@ -35,4 +35,12 @@ describe('formatChatMessage', () => {
     expect(formatChatMessage('New League', getRemaining(new Date(90061 * 1000), 0))).toBe('New League starts in 1d 01:01:01');
     expect(formatChatMessage('New League', getRemaining(new Date(0), 0))).toBe('New League is live!');
   });
+
+  it('keeps titles from being read as chat commands', () => {
+    const left = getRemaining(new Date(65 * 1000), 0);
+    expect(formatChatMessage('/ban viewer', left)).toBe('Countdown: /ban viewer starts in 00:01:05');
+    expect(formatChatMessage('.ban viewer', left)).toBe('Countdown: .ban viewer starts in 00:01:05');
+    expect(formatChatMessage('!so viewer', getRemaining(new Date(0), 0))).toBe('Countdown: !so viewer is live!');
+    expect(formatChatMessage('Path 0.5 / Launch', left)).toBe('Path 0.5 / Launch starts in 00:01:05');
+  });
 });

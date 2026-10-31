@@ -43,7 +43,9 @@ export function formatClock(r: Remaining): string {
 
 /** Single line to paste into a live chat, e.g. "New League starts in 3d 04:12:05". */
 export function formatChatMessage(title: string, r: Remaining): string {
-  return r.done ? `${title} is live!` : `${title} starts in ${formatClock(r)}`;
+  // A leading /, . or ! would make chat or a bot treat the line as a command.
+  const name = /^[/.!]/.test(title) ? `Countdown: ${title}` : title;
+  return r.done ? `${name} is live!` : `${name} starts in ${formatClock(r)}`;
 }
 
 export function formatTarget(iso: string, locale?: string): string {
