@@ -57,6 +57,30 @@ export function createTimer(input: TimerInput, now = new Date()): Timer {
   return { id: crypto.randomUUID(), ...input, createdAt: stamp, updatedAt: stamp };
 }
 
+/** Return `timers` arranged in the order given by `ids`; unknown ids are ignored and missing timers keep their place at the end. */
+export function reorderTimers(timers: Timer[], ids: string[]): Timer[] {
+  const byId = new Map(timers.map((t) => [t.id, t]));
+  const ordered = ids.flatMap((id) => {
+    const t = byId.get(id);
+    if (!t) return [];
+    byId.delete(id);
+    return [t];
+  });
+  return [...ordered, ...byId.values()];
+}
+
+/** Move the timer with `id` by `offset` positions, clamped to the list bounds. */
+export function moveTimer(timers: Timer[], id: string, offset: number): Timer[] {
+  const from = timers.findIndex((t) => t.id === id);
+  if (from === -1) return timers;
+  const to = Math.min(Math.max(from + offset, 0), timers.length - 1);
+  if (to === from) return timers;
+  const next = [...timers];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+  return next;
+}
+
 export type TimerErrors = Partial<Record<keyof TimerInput, string>>;
 
 export function validateTimer(input: { title: string; date: string; time: string }): TimerErrors {
