@@ -60,9 +60,33 @@ describe('App', () => {
     await createCountdown(user, 'Second');
 
     const nav = screen.getByRole('navigation', { name: /your countdowns/i });
-    await user.click(within(nav).getByRole('button', { name: /first/i }));
+    await user.click(within(nav).getByRole('button', { name: /^first/i }));
     expect(screen.getByRole('heading', { level: 2, name: 'First' })).toHaveFocus();
-    expect(within(nav).getByRole('button', { name: /first/i })).toHaveAttribute('aria-current', 'true');
+    expect(within(nav).getByRole('button', { name: /^first/i })).toHaveAttribute('aria-current', 'true');
+  });
+
+  it('reorders countdowns from the keyboard and persists the order', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await createCountdown(user, 'First');
+    await user.click(screen.getByRole('button', { name: /new countdown/i }));
+    await createCountdown(user, 'Second');
+
+    const nav = screen.getByRole('navigation', { name: /your countdowns/i });
+    const handle = within(nav).getByRole('button', { name: /reorder second, position 2 of 2/i });
+    handle.focus();
+    await user.keyboard('{ArrowUp}');
+
+    const titles = within(nav)
+      .getAllByRole('listitem')
+      .map((li) => li.querySelector('.font-semibold')?.textContent);
+    expect(titles).toEqual(['Second', 'First']);
+    expect(within(nav).getByRole('button', { name: /reorder second, position 1 of 2/i })).toHaveFocus();
+    expect(nav).toHaveTextContent('Second moved to position 1 of 2.');
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).timers.map((t: { title: string }) => t.title)).toEqual([
+      'Second',
+      'First',
+    ]);
   });
 
   it('builds an OBS link from the panel options', async () => {

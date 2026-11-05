@@ -17,7 +17,7 @@ type Mode = 'view' | 'create' | 'edit';
 
 export default function App() {
   const { preference, setPreference } = useTheme();
-  const { timers, active, add, update, remove, select } = useTimers();
+  const { timers, active, add, update, remove, select, reorder, move } = useTimers();
   const [mode, setMode] = useState<Mode>(() => (active ? 'view' : 'create'));
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [obsOpen, setObsOpen] = useState(false);
@@ -116,7 +116,13 @@ export default function App() {
               Your countdowns
             </h2>
           </div>
-          <TimerList timers={timers} activeId={mode === 'create' ? null : (active?.id ?? null)} onSelect={handleSelect} />
+          <TimerList
+            timers={timers}
+            activeId={mode === 'create' ? null : (active?.id ?? null)}
+            onSelect={handleSelect}
+            onReorder={reorder}
+            onMove={move}
+          />
           <Button variant="primary" className="mt-4 w-full" onClick={() => goTo('create')} disabled={mode === 'create'}>
             <span aria-hidden="true">+</span> New countdown
           </Button>
